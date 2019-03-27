@@ -1,0 +1,70 @@
+#!/usr/bin/env node
+const program = require('commander');
+const crypto = require('crypto');
+const fs = require('fs');
+const markdown = require('../src/markdown');
+const mdIds = {};
+const md5Enc = str => {
+    const saltStr = str + ':123';
+    const md5 = crypto.createHash('md5');
+    return md5.update(saltStr).digest('hex');
+};
+
+const action = {
+    open: function (mdPaths) {
+        if (mdPaths.length > 0) {
+            for (let i = 0; i < mdPaths.length; i++) {
+                const mdPath = mdPaths[i];
+                const mdId = md5Enc(mdPath);
+                if (fs.existsSync(mdPath)) {
+                    markdown.open(mdId, mdPath).then();
+                    mdIds[mdId] = mdPath;
+                }
+            }
+        }
+    },
+    close: function (mdPaths) {
+        if (mdPaths.length > 0) {
+            for (let i = 0; i < mdPaths.length; i++) {
+                const mdPath = mdPaths[i];
+                const mdId = md5Enc(mdPath);
+                markdown.close(mdId);
+            }
+        } else {
+            const keys = Object.keys(mdIds);
+            if (keys.length > 0) {
+                keys.forEach(function (key) {
+                    const mdId = mdIds[key];
+                    markdown.close(mdId);
+                    delete mdIds[key];
+                });
+            }
+        }
+    }
+};
+
+
+program
+    .version(require('../package.json').version, '-v, --version')
+    .description('markdown browser')
+    .command('open', 'View markdown on your browser')
+    .command('close', 'Close all viewed pages')
+    .action(function () {
+        try {
+            const args = program.args;
+            const method = args[0];
+            const mdPaths = [];
+            for (let i = 1; i < args.length - 1; i++) {
+                mdPaths.push(args[i]);
+            }
+            if (action[method]) {
+                action[method](mdPaths);
+            } else {
+                console.error(`${method} is not undefined`);
+            }
+        } catch (e) {
+            console.error('e : ', e);
+        }
+    })
+    .parse(process.argv);
+

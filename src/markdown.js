@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const cp = require('child_process');
 const net = require('net');
+const WebSocketServer = require('ws').Server;
 const mdObject = {}; // { [mdId] : { app , mdPath } }
 
 function checkPort(port) {
@@ -51,7 +52,6 @@ function getMarkdownHtml(mdPath) {
 }
 
 function openWebSocket(server, mdPath) {
-    const WebSocketServer = require('ws').Server;
     const wss = new WebSocketServer({server: server});
     wss.on('connection', function (ws) {
         // ws.on('message', function (data, flags) {
@@ -96,6 +96,7 @@ function openBrowser(url) {
 // 启一个markdown的页面服务器
 async function startMarkdownServer(mdId, mdPath) {
     if (mdObject[mdId]) {
+        openBrowser(mdObject[mdId].url);
         return false;
     }
     if (path.extname(mdPath) !== '.md') {

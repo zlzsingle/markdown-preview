@@ -2,7 +2,9 @@
   "name": "markdown-preview",
   "version": "1.0.0",
   "description": "markdown文件浏览器实时查看",
-  "main": "bin/www",
+  "bin": {
+    "markdown-preview": "bin/markdown-preview"
+  },
   "scripts": {
     "test": "node ./test/index.js"
   },
@@ -21,10 +23,8 @@
   },
   "homepage": "https://github.com/zlzsingle/markdown-preview#readme",
   "dependencies": {
-    "chokidar": "^2.1.5",
+    "commander": "^2.19.0",
     "express": "^4.16.4",
-    "showdown": "^1.9.0",
-    "websocket": "^1.0.28",
     "ws": "^6.2.0"
   }
 }

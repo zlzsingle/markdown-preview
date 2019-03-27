@@ -2,17 +2,29 @@
     var TOTOPHEIGHT = 100;
     var mkdID, body, html, mkdContainer, options, isLoadMathJax;
 
-    mkdID = window.location.search.replace(/\?mdId=/g, '');
+    // mkdID = window.location.search.replace(/\?mdId=/g, '');
+    mkdID = getQuery(location.search.substr(1))['mdId'];
     body = document.body;
     html = document.querySelector('html');
     mkdContainer = document.getElementById('js-markdown');
 
+    function getQuery(str) {
+        var obj = {};
+        str.split('&').map(function (item) {
+            var a = item.split('=');
+            var key = a[0];
+            var value = a[1];
+            obj[key] = value;
+        });
+        return obj;
+    }
 
     function updateTitle() {
-        var slash = getSlash();
-        var fileName = Base64.decode(location.search.slice(1)).split('&')[0].split(slash).pop();
+        // var slash = getSlash();
+        // var fileName = Base64.decode(location.search.slice(1)).split('&')[0].split(slash).pop();
+        // var title = document.getElementsByTagName('title')[0];
         var title = document.getElementsByTagName('title')[0];
-        title.innerHTML = fileName;
+        title.innerHTML = (getQuery(location.search)['title'] || 'markdown');
     }
 
     function fixAllImg(text) {

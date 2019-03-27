@@ -119,7 +119,8 @@ async function startMarkdownServer(mdId, mdPath) {
         }
     });
     app.use('/*', function (req, res) {
-        res.redirect(`/static/htmls/index.html?mdId=${req.query.mdId}`);
+        const title = path.basename(mdPath, path.extname(mdPath));
+        res.redirect(`/static/htmls/index.html?mdId=${req.query.mdId}&title=${title}`);
     });
     const url = `http://127.0.0.1:${port}/${Date.now()}?mdId=${mdId}`;
     const watch = listenMarkdown(mdPath, mdId);

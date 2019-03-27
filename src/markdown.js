@@ -2,11 +2,47 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const cp = require('child_process');
+const net = require('net');
 const mdObject = {}; // { [mdId] : { app , mdPath } }
 
+function checkPort(port) {
+    const server = net.createServer().listen(port);
+    return new Promise((resolve, reject) => {
+        server.on('listening', () => {
+            server.close();
+            resolve(port);
+        });
+        server.on('error', (err) => {
+            reject(err);
+        });
+    })
+}
+
+function randomNum(minNum, maxNum) {
+    switch (arguments.length) {
+        case 1:
+            return parseInt(Math.random() * minNum + 1, 10);
+            break;
+        case 2:
+            return parseInt(Math.random() * (maxNum - minNum + 1) + minNum, 10);
+            break;
+        default:
+            return 0;
+            break;
+    }
+}
+
 // 获取端口号
-function getPort() {
-    return 8080;
+async function getPort() {
+    while (true) {
+        const port = randomNum(7000, 9999);
+        try {
+            await checkPort(port);
+            return port;
+        } catch (err) {
+            console.error(`端口${port}被占用,换一个`);
+        }
+    }
 }
 
 // 将markdown文件渲染成html
@@ -58,18 +94,23 @@ function openBrowser(url) {
 }
 
 // 启一个markdown的页面服务器
-function startMarkdownServer(mdId, mdPath) {
+async function startMarkdownServer(mdId, mdPath) {
     if (mdObject[mdId]) {
         return false;
     }
     if (path.extname(mdPath) !== '.md') {
         throw `${mdPath} 不是markdown文件`;
     }
-    const port = getPort();
+    const port = await getPort();
     const app = express();
     app.use('/static', express.static(path.join(__dirname, '..', 'static')));
     app.use('/images', function (req, res) {
-        const imgPath = path.join(path.dirname(mdPath), req.query.imgPath);
+        let imgPath;
+        if (fs.existsSync(req.query.imgPath)) {
+            imgPath = req.query.imgPath;
+        } else {
+            imgPath = path.join(path.dirname(mdPath), req.query.imgPath);
+        }
         if (fs.existsSync(imgPath)) {
             const img = fs.createReadStream(imgPath);
             img.pipe(res);

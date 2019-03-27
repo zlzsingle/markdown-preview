@@ -2,7 +2,7 @@ const path = require('path');
 const markdownServer = require('../src/markdown');
 const mdPath = path.join(__dirname, '..', 'README.md');
 const mdId = Math.random().toString(36).substr(2);
-markdownServer.open(mdId, mdPath);
+markdownServer.open(mdId, mdPath).then();
 
 
 global.test = markdownServer;

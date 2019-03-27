@@ -21,7 +21,10 @@
   },
   "homepage": "https://github.com/zlzsingle/markdown-preview#readme",
   "dependencies": {
+    "chokidar": "^2.1.5",
     "express": "^4.16.4",
-    "showdown": "^1.9.0"
+    "showdown": "^1.9.0",
+    "websocket": "^1.0.28",
+    "ws": "^6.2.0"
   }
 }

@@ -17,9 +17,9 @@
 
     function fixAllImg(text) {
         var match, reg = /<img[^>]+?(src=("|')([^\2]+?)\2)[^>]+?>/g;
-        while((match = reg.exec(text)) !== null) {
-            if(match && match.length === 4) {
-                text = text.replace(match[3], getAbsPath(location.search, match[3]));
+        while ((match = reg.exec(text)) !== null) {
+            if (match && match.length === 4) {
+                text = text.replace(match[3], getAbsPath(match[3]));
             }
         }
         return text;
@@ -36,24 +36,14 @@
         return slash;
     }
 
-    function getAbsPath(base, path) {
+    function getAbsPath(path) {
         var slash = getSlash();
-        var bases = Base64.decode(base.slice(1)).split('&')[0].split(slash).slice(0, -1);
         var paths = path.split(slash);
-        if(/^https?:?/i.test(paths[0]) || /^\/DIYURL?.*$/.test(path)) {
+        if (/^https?:?/i.test(paths[0])) {
             return path;
-        } else if(/^$|^[a-zA-Z]:.*$/.test(paths[0])) {
-            return '/DIYURL?' + Base64.encode(path);
         } else {
-            for(var i = 0, len = paths.length; i < len; i++) {
-                if(paths[i] === '..') {
-                    bases.pop();
-                } else if(paths[i] !== '.') {
-                    bases.push(paths[i]);
-                }
-            }
+            return '/images?imgPath=' + path;
         }
-        return '/DIYURL?' + Base64.encode(bases.join(slash));
     }
 
     function loadMathJax() {
@@ -271,7 +261,7 @@
     }
 
     function winClose() {
-        // window.close();
+        window.close();
     }
 
     updateTitle();

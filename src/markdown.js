@@ -2,8 +2,6 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const cp = require('child_process');
-const showdown = require('showdown');
-const converter = new showdown.Converter();
 const mdObject = {}; // { [mdId] : { app , mdPath } }
 
 // 获取端口号
@@ -12,9 +10,33 @@ function getPort() {
 }
 
 // 将markdown文件渲染成html
-function markdownToHtml(mdPath) {
-    const text = fs.readFileSync(mdPath, 'utf-8');
-    return converter.makeHtml(text);
+function getMarkdownHtml(mdPath) {
+    return fs.readFileSync(mdPath, 'utf-8');
+}
+
+function openWebSocket(server, mdPath) {
+    const WebSocketServer = require('ws').Server;
+    const wss = new WebSocketServer({server: server});
+    wss.on('connection', function (ws) {
+        // ws.on('message', function (data, flags) {
+        //
+        // });
+        // 连接关闭，从 Map 中移除，否则长期占据内存
+        // ws.on('close', function () {
+        //
+        // });
+        const html = getMarkdownHtml(mdPath);
+        if (!wss.clientList) {
+            wss.clientList = {};
+        }
+        if (!ws.uuid) {
+            const uuid = Math.random().toString(36).substr(2);
+            wss.clientList[uuid] = ws;
+            ws.uuid = uuid;
+        }
+        ws.send(html);
+    });
+    return wss;
 }
 
 // 打开浏览器
@@ -46,19 +68,29 @@ function startMarkdownServer(mdId, mdPath) {
     const port = getPort();
     const app = express();
     app.use('/static', express.static(path.join(__dirname, '..', 'static')));
+    app.use('/images', function (req, res) {
+        const imgPath = path.join(path.dirname(mdPath), req.query.imgPath);
+        if (fs.existsSync(imgPath)) {
+            const img = fs.createReadStream(imgPath);
+            img.pipe(res);
+        } else {
+            res.end();
+        }
+    });
     app.use('/*', function (req, res) {
-        const mdId = req.query.mdId;
-        res.redirect(`/static/htmls/index.html?mdId=${mdId}`);
+        res.redirect(`/static/htmls/index.html?mdId=${req.query.mdId}`);
     });
     const url = `http://127.0.0.1:${port}/${Date.now()}?mdId=${mdId}`;
-    const chokidar = listenMarkdown(mdPath);
-    app.listen(port);
+    const watch = listenMarkdown(mdPath, mdId);
+    const server = app.listen(port);
+    const wss = openWebSocket(server, mdPath);
     mdObject[mdId] = {
-        app,
+        server,
         mdPath,
         port,
         url,
-        chokidar
+        watch,
+        wss
     };
     openBrowser(url);
     return true;
@@ -67,7 +99,16 @@ function startMarkdownServer(mdId, mdPath) {
 // 关闭markdown服务
 function closeMarkdownServer(mdId) {
     if (mdObject[mdId]) {
-        mdObject[mdId].app.close();
+        const list = mdObject[mdId].wss.clientList;
+
+        Object.keys(list).forEach(key => {
+            list[key].close();
+        });
+
+        mdObject[mdId].server.close();
+        mdObject[mdId].watch.close();
+        delete mdObject[mdId];
+
         return true;
     }
     return false;
@@ -88,9 +129,20 @@ function checkMarkdown(mdPath) {
 }
 
 // 监听markdown文件内容
-function listenMarkdown(mdPath) {
-    // todo
-    return {};
+function listenMarkdown(mdPath, mdId) {
+    fs.watchFile(mdPath, {interval: 500}, () => {
+        const item = mdObject[mdId];
+        if (item) {
+            const html = getMarkdownHtml(item.mdPath);
+            const list = item.wss.clientList;
+            Object.keys(list).forEach(key => {
+                list[key].send(html);
+            });
+        }
+    });
+    return {
+        close: () => fs.unwatchFile(mdPath)
+    };
 }
 
 

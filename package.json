@@ -10,18 +10,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zlzsingle/markdown-preview.git"
+    "url": "git+https://github.com/zlzsingle/markdown-view.git"
   },
   "keywords": [
     "markdown-preview",
+    "markdown-view",
     "markdown"
   ],
   "author": "zlzsingle",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/zlzsingle/markdown-preview/issues"
+    "url": "https://github.com/zlzsingle/markdown-view/issues"
   },
-  "homepage": "https://github.com/zlzsingle/markdown-preview#readme",
+  "homepage": "https://github.com/zlzsingle/markdown-view#readme",
   "dependencies": {
     "commander": "^2.19.0",
     "express": "^4.16.4",

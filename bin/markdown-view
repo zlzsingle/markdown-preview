@@ -45,14 +45,16 @@ const action = {
 
 program
     .version(require('../package.json').version)
-    .description('预览markdown文件')
     .option('-o, --open <filename>', 'View markdown on your browser')
+    .arguments('<filename>')
     .action(function () {
         const open = program.open;
         if (open) {
             action.open([open]);
-        } else {
-            console.log('hello world');
         }
     });
 program.parse(process.argv);
+
+if (!program.args.length) {
+    program.outputHelp();
+}

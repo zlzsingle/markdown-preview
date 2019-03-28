@@ -43,28 +43,16 @@ const action = {
     }
 };
 
-
 program
-    .version(require('../package.json').version, '-v, --version')
-    .description('markdown browser')
-    .command('open', 'View markdown on your browser')
-    .command('close', 'Close all viewed pages')
+    .version(require('../package.json').version)
+    .description('预览markdown文件')
+    .option('-o, --open <filename>', 'View markdown on your browser')
     .action(function () {
-        try {
-            const args = program.args;
-            const method = args[0];
-            const mdPaths = [];
-            for (let i = 1; i < args.length - 1; i++) {
-                mdPaths.push(args[i]);
-            }
-            if (action[method]) {
-                action[method](mdPaths);
-            } else {
-                console.error(`${method} is not undefined`);
-            }
-        } catch (e) {
-            console.error('e : ', e);
+        const open = program.open;
+        if (open) {
+            action.open([open]);
+        } else {
+            console.log('hello world');
         }
-    })
-    .parse(process.argv);
-
+    });
+program.parse(process.argv);

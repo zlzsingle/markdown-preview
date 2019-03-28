@@ -46,7 +46,6 @@ const action = {
 program
     .version(require('../package.json').version)
     .option('-o, --open <filename>', 'View markdown on your browser')
-    .arguments('<filename>')
     .action(function () {
         const open = program.open;
         if (open) {
@@ -54,7 +53,3 @@ program
         }
     });
 program.parse(process.argv);
-
-if (!program.args.length) {
-    program.outputHelp();
-}

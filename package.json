@@ -1,6 +1,6 @@
 {
   "name": "markdown-view",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "markdown文件浏览器实时查看",
   "bin": {
     "markdown-view": "bin/markdown-view"
@@ -26,6 +26,8 @@
   "dependencies": {
     "commander": "^2.19.0",
     "express": "^4.16.4",
+    "node-watch": "^0.6.1",
+    "open": "^6.1.0",
     "ws": "^6.2.0"
   }
 }

@@ -3,6 +3,8 @@ const fs = require('fs');
 const path = require('path');
 const cp = require('child_process');
 const net = require('net');
+const watch = require('node-watch');
+const open = require('open');
 const WebSocketServer = require('ws').Server;
 const mdObject = {}; // { [mdId] : { app , mdPath } }
 
@@ -75,28 +77,10 @@ function openWebSocket(server, mdPath) {
     return wss;
 }
 
-// 打开浏览器
-function openBrowser(url) {
-    let cmd;
-    try {
-        if (process.platform === 'wind32') {
-            cmd = 'start "%ProgramFiles%\Internet Explorer\iexplore.exe"';
-        } else if (process.platform === 'linux') {
-            cmd = 'xdg-open';
-        } else if (process.platform === 'darwin') {
-            cmd = 'open';
-        }
-        cmd = `${cmd} "${url}"`;
-        cp.execSync(cmd);
-    } catch (err) {
-        console.error('exec cmd :', cmd);
-    }
-}
-
 // 启一个markdown的页面服务器
 async function startMarkdownServer(mdId, mdPath) {
     if (mdObject[mdId]) {
-        openBrowser(mdObject[mdId].url);
+        await open(mdObject[mdId].url);
         return false;
     }
     if (path.extname(mdPath) !== '.md') {
@@ -135,7 +119,7 @@ async function startMarkdownServer(mdId, mdPath) {
         watch,
         wss
     };
-    openBrowser(url);
+    await open(url);
     return true;
 }
 
@@ -173,7 +157,7 @@ function checkMarkdown(mdPath) {
 
 // 监听markdown文件内容
 function listenMarkdown(mdPath, mdId) {
-    fs.watchFile(mdPath, {interval: 500}, () => {
+    const watcher = watch(mdPath, function () {
         const item = mdObject[mdId];
         if (item) {
             const html = getMarkdownHtml(item.mdPath);
@@ -184,7 +168,7 @@ function listenMarkdown(mdPath, mdId) {
         }
     });
     return {
-        close: () => fs.unwatchFile(mdPath)
+        close: () => watcher.close()
     };
 }
 

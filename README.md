@@ -20,3 +20,9 @@ markdown文件浏览器实时预览
    -o, --open <filename>  View markdown on your browser
    -h, --help             output usage information
 ```
+
+### releases
+|  版本  |  更新说明 | 日期 |
+| :----- |:---------|:----|
+| v1.0.1 | 版本发布| 2019-03-29 |
+| v1.0.2 | 修复文件监听,浏览打开bug| 2019-04-16 |

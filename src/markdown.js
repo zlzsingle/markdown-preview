@@ -1,7 +1,6 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const cp = require('child_process');
 const net = require('net');
 const watch = require('node-watch');
 const open = require('open');
@@ -25,13 +24,10 @@ function randomNum(minNum, maxNum) {
     switch (arguments.length) {
         case 1:
             return parseInt(Math.random() * minNum + 1, 10);
-            break;
         case 2:
             return parseInt(Math.random() * (maxNum - minNum + 1) + minNum, 10);
-            break;
         default:
             return 0;
-            break;
     }
 }
 

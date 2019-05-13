@@ -1,24 +1,11 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const net = require('net');
 const watch = require('node-watch');
 const open = require('open');
 const WebSocketServer = require('ws').Server;
 const mdObject = {}; // { [mdId] : { app , mdPath } }
-
-function checkPort(port) {
-    const server = net.createServer().listen(port);
-    return new Promise((resolve, reject) => {
-        server.on('listening', () => {
-            server.close();
-            resolve(port);
-        });
-        server.on('error', (err) => {
-            reject(err);
-        });
-    })
-}
+const portfinder = require('portfinder');
 
 function randomNum(minNum, maxNum) {
     switch (arguments.length) {
@@ -34,10 +21,10 @@ function randomNum(minNum, maxNum) {
 // 获取端口号
 async function getPort() {
     while (true) {
-        const port = randomNum(7000, 9999);
         try {
-            await checkPort(port);
-            return port;
+            portfinder.basePort = randomNum(7000, 9999);
+            await portfinder.getPortPromise();
+            return portfinder.basePort;
         } catch (err) {
             console.error(`端口${port}被占用,换一个`);
         }
@@ -115,6 +102,7 @@ async function startMarkdownServer(mdId, mdPath) {
         watch,
         wss
     };
+    console.log(url);
     await open(url);
     return true;
 }
@@ -159,7 +147,11 @@ function listenMarkdown(mdPath, mdId) {
             const html = getMarkdownHtml(item.mdPath);
             const list = item.wss.clientList;
             Object.keys(list).forEach(key => {
-                list[key].send(html);
+                try {
+                    list[key].send(html);
+                } catch (err){
+
+                }
             });
         }
     });

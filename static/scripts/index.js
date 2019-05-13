@@ -24,7 +24,7 @@
         // var fileName = Base64.decode(location.search.slice(1)).split('&')[0].split(slash).pop();
         // var title = document.getElementsByTagName('title')[0];
         var title = document.getElementsByTagName('title')[0];
-        title.innerHTML = (getQuery(location.search)['title'] || 'markdown');
+        title.innerHTML = decodeURI(getQuery(location.search)['title'] || 'markdown');
     }
 
     function fixAllImg(text) {

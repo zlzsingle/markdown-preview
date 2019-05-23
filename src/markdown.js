@@ -6,6 +6,7 @@ const open = require('open');
 const WebSocketServer = require('ws').Server;
 const mdObject = {}; // { [mdId] : { app , mdPath } }
 const portfinder = require('portfinder');
+const myIp = require('my-ip');
 
 function randomNum(minNum, maxNum) {
     switch (arguments.length) {
@@ -90,7 +91,8 @@ async function startMarkdownServer(mdId, mdPath) {
         const title = path.basename(mdPath, path.extname(mdPath));
         res.redirect(`/static/htmls/index.html?mdId=${req.query.mdId}&title=${title}`);
     });
-    const url = `http://127.0.0.1:${port}/${Date.now()}?mdId=${mdId}`;
+    const ipaddr = myIp();
+    const url = `http://${ipaddr}:${port}/${Date.now()}?mdId=${mdId}`;
     const watch = listenMarkdown(mdPath, mdId);
     const server = app.listen(port);
     const wss = openWebSocket(server, mdPath);

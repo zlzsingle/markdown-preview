@@ -45,11 +45,10 @@ const action = {
 
 program
     .version(require('../package.json').version)
-    .option('-o, --open <filename>', 'View markdown on your browser')
-    .action(function () {
-        const open = program.open;
-        if (open) {
-            action.open([open]);
+    .arguments('<filename>')
+    .action(function (filename) {
+        if(filename){
+            action.open([filename]);
         }
     });
 program.parse(process.argv);

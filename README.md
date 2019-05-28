@@ -3,14 +3,15 @@
 markdown文件浏览器实时预览
 
 ### Install
+
 ```bash
- npm install -g markdown-view
+   npm install -g markdown-view
 ```
 
 ### Usage
 
 ```bash
- markdown-view <filename>
+   markdown-view <filename>
 ```
 
 ### Options
@@ -27,6 +28,7 @@ markdown文件浏览器实时预览
 ```
 
 ### releases
+
 |  版本  |  更新说明 | 日期 |
 | :----- |:---------|:----|
 | v1.0.1 | 版本发布| 2019-03-29 |

@@ -3,7 +3,6 @@ const program = require('commander');
 const crypto = require('crypto');
 const fs = require('fs');
 const markdown = require('../src/markdown');
-const mdIds = {};
 const md5Enc = str => {
     const saltStr = str + ':123';
     const md5 = crypto.createHash('md5');
@@ -11,34 +10,12 @@ const md5Enc = str => {
 };
 
 const action = {
-    open: function (mdPaths) {
-        if (mdPaths.length > 0) {
-            for (let i = 0; i < mdPaths.length; i++) {
-                const mdPath = mdPaths[i];
-                const mdId = md5Enc(mdPath);
-                if (fs.existsSync(mdPath)) {
-                    markdown.open(mdId, mdPath).then();
-                    mdIds[mdId] = mdPath;
-                }
-            }
-        }
-    },
-    close: function (mdPaths) {
-        if (mdPaths.length > 0) {
-            for (let i = 0; i < mdPaths.length; i++) {
-                const mdPath = mdPaths[i];
-                const mdId = md5Enc(mdPath);
-                markdown.close(mdId);
-            }
+    open: function (mdPath, port) {
+        if (fs.existsSync(mdPath)) {
+            const mdId = md5Enc(mdPath);
+            markdown.open(mdId, mdPath, port).then();
         } else {
-            const keys = Object.keys(mdIds);
-            if (keys.length > 0) {
-                keys.forEach(function (key) {
-                    const mdId = mdIds[key];
-                    markdown.close(mdId);
-                    delete mdIds[key];
-                });
-            }
+            console.log(`${mdPath}文件不存在!`);
         }
     }
 };
@@ -46,9 +23,12 @@ const action = {
 program
     .version(require('../package.json').version)
     .arguments('<filename>')
+    .option('-p, --port <port>', 'server port (defaults to random)')
     .action(function (filename) {
-        if(filename){
-            action.open([filename]);
-        }
+        action.open(filename, program.port);
     });
 program.parse(process.argv);
+
+if (!program.args.length) {
+    program.outputHelp();
+}

@@ -19,15 +19,25 @@ function randomNum(minNum, maxNum) {
     }
 }
 
+// 检查端口是否占用
+async function checkPort(port) {
+    try {
+        portfinder.basePort = port;
+        await portfinder.getPortPromise();
+        return true;
+    } catch (e) {
+        console.error(`端口${port}被占用,换一个`);
+        return false;
+    }
+}
+
 // 获取端口号
 async function getPort() {
     while (true) {
-        try {
-            portfinder.basePort = randomNum(7000, 9999);
-            await portfinder.getPortPromise();
-            return portfinder.basePort;
-        } catch (err) {
-            console.error(`端口${port}被占用,换一个`);
+        const port = randomNum(7000, 9999);
+        const ok = await checkPort(port);
+        if (ok) {
+            return port;
         }
     }
 }
@@ -62,16 +72,19 @@ function openWebSocket(server, mdPath) {
 }
 
 // 启一个markdown的页面服务器
-async function startMarkdownServer(mdId, mdPath) {
-    if (mdObject[mdId]) {
-        await open(mdObject[mdId].url);
-        return false;
-    }
+async function startMarkdownServer(mdId, mdPath, port) {
     if (path.extname(mdPath) !== '.md') {
         throw `${mdPath} 不是markdown文件`;
     }
-    const port = await getPort();
     const app = express();
+    if (port) {
+        const ok = await checkPort(port);
+        if (!ok) {
+            await getPort(port);
+        }
+    } else {
+        port = await getPort(port);
+    }
     app.use('/static', express.static(path.join(__dirname, '..', 'static')));
     app.use('/images', function (req, res) {
         let imgPath;
@@ -104,8 +117,8 @@ async function startMarkdownServer(mdId, mdPath) {
         watch,
         wss
     };
-    console.log(url);
-    await open(url);
+    console.log(`http://${ipaddr}:${port}`);
+    await open(`http://${ipaddr}:${port}`);
     return true;
 }
 

@@ -17,8 +17,9 @@ markdown文件浏览器实时预览
 ### Options
 
 ```bash
-   -V, --version          output the version number
-   -h, --help             output usage information
+   -V, --version      output the version number
+   -p, --port <port>  server port (defaults to random)
+   -h, --help         output usage information
 ```
 
 ### Demo

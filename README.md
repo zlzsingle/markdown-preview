@@ -26,6 +26,8 @@ markdown文件浏览器实时预览
 
 ```bash
    markdown-view ./README.md
+   
+   markdown-view -p 8000 ./README.md
 ```
 
 ### releases

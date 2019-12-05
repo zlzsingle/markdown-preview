@@ -118,7 +118,7 @@ async function startMarkdownServer(mdId, mdPath, port) {
         wss
     };
     console.log(`http://${ipaddr}:${port}`);
-    await open(`http://${ipaddr}:${port}`);
+    await open(`http://${ipaddr}:${port}?mdId=${mdId}`);
     return true;
 }
 

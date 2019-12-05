@@ -1,19 +1,12 @@
 #!/usr/bin/env node
 const program = require('commander');
-const crypto = require('crypto');
 const fs = require('fs');
 const markdown = require('../src/markdown');
-const md5Enc = str => {
-    const saltStr = str + ':123';
-    const md5 = crypto.createHash('md5');
-    return md5.update(saltStr).digest('hex');
-};
 
 const action = {
     open: function (mdPath, port) {
         if (fs.existsSync(mdPath)) {
-            const mdId = md5Enc(mdPath);
-            markdown.open(mdId, mdPath, port).then();
+            markdown.open('markdown', mdPath, port).then();
         } else {
             console.log(`${mdPath}文件不存在!`);
         }

@@ -6,7 +6,7 @@ const markdown = require('../src/markdown');
 const action = {
     open: function (mdPath, port) {
         if (fs.existsSync(mdPath)) {
-            markdown.open('markdown', mdPath, port).then();
+            markdown.open(mdPath, port).then();
         } else {
             console.log(`${mdPath}文件不存在!`);
         }

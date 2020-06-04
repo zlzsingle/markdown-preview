@@ -4,9 +4,10 @@ const path = require('path');
 const watch = require('node-watch');
 const open = require('open');
 const WebSocketServer = require('ws').Server;
-const mdObject = {}; // { [mdId] : { app , mdPath } }
 const portfinder = require('portfinder');
 const myIp = require('my-ip');
+
+let mdObject = null; // { app , mdPath }
 
 function randomNum(minNum, maxNum) {
     switch (arguments.length) {
@@ -72,8 +73,8 @@ function openWebSocket(server, mdPath) {
 }
 
 // 启一个markdown的页面服务器
-async function startMarkdownServer(mdId, mdPath, port) {
-    if (path.extname(mdPath) !== '.md') {
+async function startMarkdownServer(mdPath, port) {
+    if (path.extname(mdPath).toLocaleLowerCase() !== '.md') {
         throw `${mdPath} 不是markdown文件`;
     }
     const app = express();
@@ -102,14 +103,14 @@ async function startMarkdownServer(mdId, mdPath, port) {
     });
     app.use('/*', function (req, res) {
         const title = path.basename(mdPath, path.extname(mdPath));
-        res.redirect(`/static/htmls/index.html?mdId=${req.query.mdId}&title=${title}`);
+        res.redirect(`/static/htmls/index.html?title=${title}`);
     });
     const ipaddr = myIp();
-    const url = `http://${ipaddr}:${port}/${Date.now()}?mdId=${mdId}`;
-    const watch = listenMarkdown(mdPath, mdId);
+    const url = `http://${ipaddr}:${port}/${Date.now()}`;
+    const watch = listenMarkdown(mdPath);
     const server = app.listen(port);
     const wss = openWebSocket(server, mdPath);
-    mdObject[mdId] = {
+    mdObject = {
         server,
         mdPath,
         port,
@@ -118,46 +119,14 @@ async function startMarkdownServer(mdId, mdPath, port) {
         wss
     };
     console.log(`http://${ipaddr}:${port}`);
-    await open(`http://${ipaddr}:${port}?mdId=${mdId}`);
+    await open(`http://${ipaddr}:${port}`);
     return true;
 }
 
-// 关闭markdown服务
-function closeMarkdownServer(mdId) {
-    if (mdObject[mdId]) {
-        const list = mdObject[mdId].wss.clientList;
-
-        Object.keys(list).forEach(key => {
-            list[key].close();
-        });
-
-        mdObject[mdId].server.close();
-        mdObject[mdId].watch.close();
-        delete mdObject[mdId];
-
-        return true;
-    }
-    return false;
-}
-
-// 检查这个markdown文件是否存在于server, true存在,false不存在
-function checkMarkdown(mdPath) {
-    const keys = Object.keys(mdObject);
-    if (keys.length > 0) {
-        for (let i = 0; i < keys.length; i++) {
-            const item = mdObject[i];
-            if (item.mdPath === mdPath) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
 // 监听markdown文件内容
-function listenMarkdown(mdPath, mdId) {
+function listenMarkdown(mdPath) {
     const watcher = watch(mdPath, function () {
-        const item = mdObject[mdId];
+        const item = mdObject;
         if (item) {
             const html = getMarkdownHtml(item.mdPath);
             const list = item.wss.clientList;
@@ -178,6 +147,4 @@ function listenMarkdown(mdPath, mdId) {
 
 module.exports = {
     open: startMarkdownServer,
-    close: closeMarkdownServer,
-    check: checkMarkdown
 };

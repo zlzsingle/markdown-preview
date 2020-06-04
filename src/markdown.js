@@ -1,4 +1,5 @@
 const express = require('express');
+const favicon = require('express-favicon');
 const fs = require('fs');
 const path = require('path');
 const watch = require('node-watch');
@@ -86,6 +87,7 @@ async function startMarkdownServer(mdPath, port) {
     } else {
         port = await getPort(port);
     }
+    app.use(favicon(path.join(__dirname, '..', '/favicon.png')));
     app.use('/static', express.static(path.join(__dirname, '..', 'static')));
     app.use('/images', function (req, res) {
         let imgPath;
@@ -133,7 +135,7 @@ function listenMarkdown(mdPath) {
             Object.keys(list).forEach(key => {
                 try {
                     list[key].send(html);
-                } catch (err){
+                } catch (err) {
 
                 }
             });
